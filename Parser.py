@@ -8,39 +8,7 @@
 
 
 # Defined function
-# Function to read a string and convert infix to postfix
-def infix_to_postfix_conversion(user_input):
-    # Variables
-    specials = {60: '^', '*': 50, '.': 40, '|': 30, '-': 30, '+': 30}
-    postfix = ''
-    stack = ''
 
-    for char in user_input:
-        if char == '(':
-            stack = stack + char  # if '('  add to the stack
-        elif char == ')':
-            while stack[-1] != '(':  # while the char at the end of the string:
-                postfix = postfix + stack[-1]  # add from the end of the stack, to the postfix
-                stack = stack[:-1]  # removing from the top of the stack
-            stack = stack[:-1]  # remove the open '(' bracket from the stack
-        elif char in specials:  # if the chars are in the dictionary process:
-            # loop through the stack and check the precedence of each char, get the char provided, if none then 0) <= get char at the end of the stack[-1] if none then 0
-            while stack and specials.get(char, 0) <= specials.get(stack[-1], 0):
-                # remove from the top of the stack and add it to the postfix expression:
-                postfix, stack = postfix + stack[-1], stack[:-1]
-            stack = stack + char  # push the special char onto the stack!!!
-
-        else:
-            postfix = postfix + char  # append postfix expression
-
-    # if anything is left, push them onto the end of the postfix expression
-    while stack:  # loop through the stack
-        postfix = postfix + stack[-1]  # add to postfix
-        stack = stack[:-1]  # removing from the top of the stack
-    return postfix
-
-
-# End infix_to_postfix_conversion function
 
 # Main menu function
 def main_menu():
