@@ -131,14 +131,16 @@ def compile(postfix_expression):
 def follows(state):
     # Create a new state
     states = set()
-    set.add(state)
+    states.add(state)
 
     # Check if state has arrows labelled e from it.
     if state.label is None:
-        # if there is an edge1, follow it
-        states |= follows(state.edge1)
-        # if there is an edge2, follow it
-        states |= follows(state.edge2)
+        if state.edge1 is not None:
+            # if there is an edge1, follow it
+            states |= follows(state.edge1)
+            # if there is an edge2, follow it
+        if state.edge2 is not None:
+            states |= follows(state.edge2)
     # Return the set of states.
     return states
 
@@ -157,7 +159,8 @@ def match(infix, string):
         # Loop through the current set of states.
         for c in current:
             # Check if the state is labeled s
-            nextone |= follows(c.edge1)
+            if c.label == s:
+                nextone |= follows(c.edge1)
         # Set current to next, and clear out next.
         current = nextone
         nextone = set()  # set back to a blank state.
@@ -173,3 +176,5 @@ strings = ["", "abc", "abbc", "abcc", "abad", "abbbc"]
 for i in infixes:
     for s in strings:
         print(match(i, s), i, s)
+
+# End of program
