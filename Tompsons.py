@@ -11,7 +11,7 @@
 # Function to read a string and convert infix to postfix
 def infix_to_postfix_conversion(infix):
     # Variables
-    specials = {'^': 60, '*': 50, '.': 40, '|': 30, '-': 30, '+': 30}
+    specials = {'*': 50, '?': 50, '+': 50, '.': 40, '|': 30}
     postfix = ''
     stack = ''
 
@@ -65,6 +65,7 @@ def compile(postfix_expression):
 
     # Loop through each char:
     for char in postfix_expression:
+        # Catenation:
         if char is '.':
             # Last in, first out:
             nfa2 = nfa_stack.pop()
@@ -76,6 +77,8 @@ def compile(postfix_expression):
             # Push new NFA to the stack
             new_nfa = NFA(nfa1.initial, nfa2.accept)
             nfa_stack.append(new_nfa)
+
+        # Alternation:
         elif char is '|':
             # Last in, first out
             # Pop two NFAs off the stack:
@@ -93,6 +96,26 @@ def compile(postfix_expression):
 
             # Push new NFA to the stack
             nfa_stack.append(NFA(initial, accept))
+
+        # Zero or one:
+        elif char is '?':
+            # pop a single NFA from the stack
+            nfa1 = nfa_stack.pop()
+
+            # Create new initial and accept states
+            initial = State()
+            accept = State()
+
+            # Create new initial state to nfa1s initial state and the new accept state.
+            initial.edge1 = nfa1.initial
+
+            # Join the old accept state to the new accept state and nfa1s initial state.
+            nfa1.accept.edge2 = accept
+
+            # Push the new NFA to the stack.
+            nfa_stack.append(NFA(initial, accept))
+
+        # Zero or more:
         elif char is '*':
             # pop a single NFA from the stack
             nfa1 = nfa_stack.pop()
@@ -111,6 +134,8 @@ def compile(postfix_expression):
 
             # Push the new NFA to the stack.
             nfa_stack.append(NFA(initial, accept))
+
+        # One or more
         elif char is '+':
             # pop a single NFA from the stack
             nfa1 = nfa_stack.pop()
@@ -198,8 +223,12 @@ def test_data():
         ('a.(b|d).c*', 'abc'),  # True
         ('(a.(b|d))*', 'abbc'),  # False
         ('a.(b.b)*.c', 'abccc'),  # False
-        ('a.b|d.c*', 'dcccc'),  # True
-
+        ('a.b|d.c+', 'd'),  # False
+        ('a.b|d.c+', 'dcccc'),  # True
+        ('a.b|d.c+', 'ab'),  # True
+        ('a.b|d.c+', 'abc'),  # False
+        ('a.b.c?', 'abcccc'),  # False
+        ('a.b.c?', 'abc'),  # True
     ]
     # Loop through each tuple in the list and run the match function to check the postfix expression to the string
     print('======== Result ========')
@@ -250,6 +279,7 @@ def navigation():
         main_menu()
     elif user_input is "2":
         quit()
+
 
 # Run main menu to start program
 main_menu()
