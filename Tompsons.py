@@ -19,8 +19,8 @@ def infix_to_postfix_conversion(infix):
         if char is '(':
             stack += char  # if '('  add to the stack
         elif char is ')':
-            while stack[-1] != '(':  # while the char at the end of the string:
-                postfix += stack[-1]  # add from the end of the stack, to the postfix
+            while stack[-1] != '(':  # while the char at the end of the string, last char in the string.
+                postfix += stack[-1]  # add from the end of the stack to the postfix.
                 stack = stack[:-1]  # removing from the top of the stack
             stack = stack[:-1]  # remove the open '(' bracket from the stack
         elif char in specials:  # if the chars are in the dictionary process:
@@ -28,14 +28,14 @@ def infix_to_postfix_conversion(infix):
             while stack and specials[char] <= specials.get(stack[-1], 0):
                 # remove from the top of the stack and add it to the postfix expression:
                 postfix, stack = postfix + stack[-1], stack[:-1]
-            stack = stack + char  # push the special char onto the stack!!!
+            stack += char  # push the special char onto the stack!!!
 
         else:
-            postfix = postfix + char  # append postfix expression
+            postfix += char  # append postfix expression
 
     # if anything is left, push them onto the end of the postfix expression
     while stack:  # loop through the stack
-        postfix = postfix + stack[-1]  # add to postfix
+        postfix += stack[-1]  # add to postfix
         stack = stack[:-1]  # removing from the top of the stack
     return postfix
 
@@ -43,7 +43,7 @@ def infix_to_postfix_conversion(infix):
 # End infix_to_postfix_conversion function
 
 # State class represents a state with two arrows, labelled by label.
-# None is a label for representing "e" arrows
+# None is a label for representing "empty" arrows
 class State:
     label = None
     edge1 = None
@@ -65,7 +65,7 @@ def compile(postfix_expression):
 
     # Loop through each char:
     for char in postfix_expression:
-        if char == '.':
+        if char is '.':
             # Last in, first out:
             nfa2 = nfa_stack.pop()
             nfa1 = nfa_stack.pop()
@@ -76,7 +76,7 @@ def compile(postfix_expression):
             # Push new NFA to the stack
             new_nfa = NFA(nfa1.initial, nfa2.accept)
             nfa_stack.append(new_nfa)
-        elif char == '|':
+        elif char is '|':
             # Last in, first out
             # Pop two NFAs off the stack:
             nfa2 = nfa_stack.pop()
@@ -93,7 +93,7 @@ def compile(postfix_expression):
 
             # Push new NFA to the stack
             nfa_stack.append(NFA(initial, accept))
-        elif char == '*':
+        elif char is '*':
             # pop a single NFA from the stack
             nfa1 = nfa_stack.pop()
 
@@ -180,7 +180,7 @@ def match(infix, string):
         # Loop through the current set of states.
         for c in current:
             # Check if the state is labeled 's'
-            if c.label == s:
+            if c.label is s:
                 next_one |= follows(c.edge1)
         # Set current to next, and clear out next.
         current = next_one
@@ -190,14 +190,66 @@ def match(infix, string):
     return nfa.accept in current
 
 
-# List of tuples:
-tests = [
-    ('a+', ''),
-    ('a.b.c*', 'abc'),
-    ('a.(b|d).c*', 'abc'),
-    ('(a.(b|d))*', 'abbc'),
-    ('a.(b.b)*.c', 'abcc')
-]
-# Loop through each tuple in the list and run the match function to check the postfix expression to the string
-for exp, res in tests:
-    print(match(exp, res), exp, res)
+def test_data():
+    # List of tuples:
+    tests = [
+        ('a.b.c', ''),  # False
+        ('a.b.c*', 'abc'),  # True
+        ('a.(b|d).c*', 'abc'),  # True
+        ('(a.(b|d))*', 'abbc'),  # False
+        ('a.(b.b)*.c', 'abccc'),  # False
+        ('a.b|d.c*', 'dcccc'),  # True
+
+    ]
+    # Loop through each tuple in the list and run the match function to check the postfix expression to the string
+    print('======== Result ========')
+    for postfix_expression, string in tests:
+        print(match(postfix_expression, string), postfix_expression, string)
+    print('========================')
+
+    navigation()
+    print("\n==== End of test data ====\nRetuning to main menu\n")
+    main_menu()
+
+
+# End test_data function
+
+
+# Main menu function
+def main_menu():
+    # Heading
+    print("=======================================================================================")
+    print("==========                        Cathal Butler                              ==========")
+    print("==========   Parse the regular expression from infix to postfix notation     ==========")
+    print("==========                  And compare them to strings                      ==========")
+    print("=======================================================================================")
+
+    user_input = input(
+        '\nPlease choose from one of the options below:'
+        '\n1: Input an expression and a string to compare it to.'
+        '\n2: Output a series of tests built into the program.\n')
+
+    if user_input is "1":
+        expression = input('Please enter a expression\n')
+        user_string = input('Please enter a expression to compare against the expression\n')
+        print('======== Result ========\n', match(expression, user_string), expression, user_string,
+              '\n========================')
+        navigation()
+    elif user_input is "2":
+        test_data()
+    else:
+        print('Invalid option. Returning to main menu\n')
+        main_menu()
+
+
+# End main_menu function.
+
+def navigation():
+    user_input = input('\nPlease enter one 1 to return to the main menu or 2 to exit\n')
+    if user_input is "1":
+        main_menu()
+    elif user_input is "2":
+        quit()
+
+# Run main menu to start program
+main_menu()
